@@ -29,7 +29,7 @@ Multi-agent AI system where specialized agents work like a real founding team:
 | **Data** | LangChain + Perplexity API | Real-time market data via RAG |
 
 ### **⚡ Live Demo**
-**MVP Link**: https://rajegowdac024.github.io/Business-plans-mvp-agent/  
+[**MVP Link**]: (https://rajegowdac024.github.io/Business-plans-mvp-agent/)  
 
 ### **🚀 How to Use**
 1. Open the [Live Demo](https://rajegowdac024.github.io/Business-plans-mvp-agent-/)
