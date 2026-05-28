@@ -63,7 +63,7 @@ Built by RAJE GOWDA.C for **Outskill × OpenAI AI Builders Hackathon 2026**
 
 ### **📬 Feedback**
 Founders: Would you use this before your next investor call? What's missing? 
-Open an [Issue](https://github.com/RAJEGOWDAC024/Business-plans-mvp-agent/) or DM me on [LinkedIn](https://www.linkedin.com/in/raje-gowda-c-a4b56929a).
+Open an Issue and DM me on [LinkedIn](https://www.linkedin.com/in/raje-gowda-c-a4b56929a).
 
 ---
 
