@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outskill × OpenAI | AI Business Plan Agents</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    :root {
+        --outskill-green: #7CFC00;
+        --bg-primary: #0A0A0F;
+        --bg-secondary: #13131A;
+        --bg-tertiary: #1A1A23;
+        --border-color: #2A2A35;
+    }
+    
+    body {
+        background: var(--bg-primary);
+        color: #E4E4E7;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #7CFC00 0%, #5FD700 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .glow-effect {
+        box-shadow: 0 0 30px rgba(124, 252, 0, 0.15);
+    }
+    
+    .agent-card {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .agent-card.active {
+        border-color: var(--outskill-green);
+        box-shadow: 0 0 20px rgba(124, 252, 0, 0.2);
+    }
+    
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    
+    .pulse-dot {
+        animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    
+    .pulse-dot:nth-child(2) { animation-delay: 0.2s; }
+    .pulse-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .slide-in {
+        animation: slideIn 0.5s ease-out forwards;
+    }
+    
+    .glass-effect {
+        background: rgba(19, 19, 26, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .input-field {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+    
+    .input-field:focus {
+        border-color: var(--outskill-green);
+        box-shadow: 0 0 0 3px rgba(124, 252, 0, 0.1);
+        outline: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #7CFC00 0%, #6FE000 100%);
+        color: #0A0A0F;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(124, 252, 0, 0.3);
+    }
+    
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+    
+    .btn-secondary:hover {
+        border-color: var(--outskill-green);
+        background: rgba(124, 252, 0, 0.05);
+    }
+    
+    .section-edit {
+        min-height: 100px;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .skeleton {
+        background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    .progress-bar {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--outskill-green), transparent);
+        background-size: 200% 100%;
+        animation: progress 2s linear infinite;
+    }
+    
+    @keyframes progress {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #3A3A45;
+    }
+</style>
+</head>
+<body class="antialiased">
+    <!-- Header -->
+    <header class="glass-effect sticky top-0 z-50 border-b border-[var(--border-color)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#7CFC00] to-[#5FD700] flex items-center justify-center">
+                        <i class="fas fa-robot text-[#0A0A0F] text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">
+                            <span class="gradient-text">Outskill</span> 
+                            <span class="text-zinc-400">×</span> 
+                            <span class="text-white">OpenAI</span>
+                        </h1>
+                        <p class="text-xs text-zinc-500">AI Business Plan Agents</p>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 text-xs text-zinc-500">
+                    <span class="px-3 py-1 rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-color)]">
+                        <i class="fas fa-trophy text-[#7CFC00] mr-1"></i>
+                        Hackathon MVP
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <div id="heroSection" class="mb-12 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect mb-6">
+                <span class="w-2 h-2 rounded-full bg-[#7CFC00] pulse-dot"></span>
+                <span class="text-sm text-zinc-400">4 AI Agents Ready to Build Your Business Plan</span>
+            </div>
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+                Build Business Plans with<br><span class="gradient-text">Autonomous AI Agents</span>
+            </h2>
+            <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-8">
+                Deploy specialized AI agents that collaborate in parallel to research, analyze, and critique your business idea—delivering investor-ready plans in minutes.
+            </p>
+        </div>
+
+        <!-- Input Section -->
+        <div id="inputSection" class="glass-effect rounded-2xl p-6 sm:p-8 mb-8 glow-effect">
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <i class="fas fa-lightbulb text-[#7CFC00]"></i>
+                Describe Your Business
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">Company Name *</label>
+                    <input type="text" id="companyName" class="input-field w-full px-4 py-3 rounded-lg text-white" placeholder="e.g., NexaHealth" value="FluxFlow AI">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">Target Market *</label>
+                    <input type="text" id="targetMarket" class="input-field w-full px-4 py-3 rounded-lg text-white" placeholder="e.g., SMB E-commerce" value="Mid-market SaaS Companies">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">Business Idea *</label>
+                    <textarea id="businessIdea" rows="3" class="input-field w-full px-4 py-3 rounded-lg text-white resize-none" placeholder="Describe your core product or service...">AI-powered workflow automation platform that connects disparate SaaS tools using natural language. Users describe what they want automated, and our agents build, test, and deploy custom integrations in minutes without code.</textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">Additional Context <span class="text-zinc-600">(Optional)</span></label>
+                    <textarea id="additionalDetails" rows="2" class="input-field w-full px-4 py-3 rounded-lg text-white resize-none" placeholder="Unique advantages, competitive landscape, funding goals...">Strong founding team from Zapier and OpenAI. Raised $500k pre-seed. Need $3M for GTM and product scaling. Competing with Make.com and n8n but focusing on enterprise security and compliance.</textarea>
+                </div>
+            </div>
+            <button id="generateBtn" class="btn-primary w-full sm:w-auto px-8 py-4 rounded-lg mt-6 text-lg font-semibold">
+                <i class="fas fa-rocket mr-2"></i>
+                Generate Business Plan
+            </button>
+        </div>
+
+        <!-- Agent Dashboard -->
+        <div id="agentDashboard" class="hidden mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold flex items-center gap-3">
+                    <i class="fas fa-users text-[#7CFC00]"></i>
+                    Agent Collaboration Dashboard
+                </h3>
+                <div id="overallProgress" class="text-sm text-zinc-400">Initializing...</div>
+            </div>
+            
+            <div class="progress-bar mb-6 rounded-full"></div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Market Researcher Agent -->
+                <div class="agent-card rounded-xl p-5" data-agent="researcher">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                            <i class="fas fa-search-dollar text-blue-400 text-xl"></i>
+                        </div>
+                        <span class="agent-status text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-500">Queued</span>
+                    </div>
+                    <h4 class="font-semibold mb-1">Market Researcher</h4>
+                    <p class="text-xs text-zinc-500 mb-3">Analyzing TAM/SAM/SOM and competitive landscape</p>
+                    <div class="agent-activity text-xs text-zinc-400 h-8"></div>
+                </div>
+
+                <!-- CFO Agent -->
+                <div class="agent-card rounded-xl p-5" data-agent="cfo">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                            <i class="fas fa-chart-line text-emerald-400 text-xl"></i>
+                        </div>
+                        <span class="agent-status text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-500">Queued</span>
+                    </div>
+                    <h4 class="font-semibold mb-1">CFO Agent</h4>
+                    <p class="text-xs text-zinc-500 mb-3">Building financial models and projections</p>
+                    <div class="agent-activity text-xs text-zinc-400 h-8"></div>
+                </div>
+
+                <!-- CMO Agent -->
+                <div class="agent-card rounded-xl p-5" data-agent="cmo">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                            <i class="fas fa-bullhorn text-purple-400 text-xl"></i>
+                        </div>
+                        <span class="agent-status text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-500">Queued</span>
+                    </div>
+                    <h4 class="font-semibold mb-1">CMO Agent</h4>
+                    <p class="text-xs text-zinc-500 mb-3">Crafting go-to-market and growth strategy</p>
+                    <div class="agent-activity text-xs text-zinc-400 h-8"></div>
+                </div>
+
+                <!-- Critic Agent -->
+                <div class="agent-card rounded-xl p-5" data-agent="critic">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-orange-400 text-xl"></i>
+                        </div>
+                        <span class="agent-status text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-500">Queued</span>
+                    </div>
+                    <h4 class="font-semibold mb-1">Critic Agent</h4>
+                    <p class="text-xs text-zinc-500 mb-3">Identifying risks and stress-testing assumptions</p>
+                    <div class="agent-activity text-xs text-zinc-400 h-8"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generated Output -->
+        <div id="outputSection" class="hidden">
+            <!-- Actions Bar -->
+            <div class="glass-effect rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-file-alt text-[#7CFC00]"></i>
+                    <span class="font-semibold">Business Plan Ready</span>
+                    <span class="text-xs text-zinc-500">Generated in <span id="genTime">0</span>s</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="feedbackBtn" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="fas fa-redo mr-2"></i>Regenerate with Feedback
+                    </button>
+                    <button id="exportBtn" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>Export PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feedback Modal Input -->
+            <div id="feedbackPanel" class="hidden glass-effect rounded-xl p-6 mb-6 border border-[#7CFC00]/30">
+                <h4 class="font-semibold mb-3 flex items-center gap-2">
+                    <i class="fas fa-comment-dots text-[#7CFC00]"></i>
+                    Provide Feedback to Agents
+                </h4>
+                <textarea id="feedbackInput" rows="3" class="input-field w-full px-4 py-3 rounded-lg text-white mb-3 resize-none" placeholder="e.g., Focus more on enterprise clients. Increase marketing budget by 20%. Add international expansion risks..."></textarea>
+                <div class="flex gap-2">
+                    <button id="submitFeedbackBtn" class="btn-primary px-6 py-2 rounded-lg text-sm font-medium">
+                        <i class="fas fa-sync mr-2"></i>Regenerate
+                    </button>
+                    <button id="cancelFeedbackBtn" class="btn-secondary px-6 py-2 rounded-lg text-sm font-medium">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Business Plan Sections -->
+            <div class="space-y-6" id="businessPlan">
+                <!-- Content will be generated here -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-20 border-t border-[var(--border-color)] py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-zinc-600">
+            <p>Built for Outskill AI Builders Hackathon • Powered by Multi-Agent Collaboration</p>
+        </div>
+    </footer>
+
+    <script>
+        const state = {
+            generating: false,
+            agents: {
+                researcher: { status: 'queued', activities: [
+                    'Scanning market databases...',
+                    'Analyzing competitor pricing...',
+                    'Calculating TAM/SAM/SOM...',
+                    'Identifying market trends...'
+                ], progress: 0 },
+                cfo: { status: 'queued', activities: [
+                    'Modeling revenue streams...',
+                    'Projecting burn rate...',
+                    'Calculating unit economics...',
+                    'Building 3-year forecast...'
+                ], progress: 0 },
+                cmo: { status: 'queued', activities: [
+                    'Defining ICP personas...',
+                    'Mapping acquisition channels...',
+                    'Designing GTM motion...',
+                    'Estimating CAC/LTV...'
+                ], progress: 0 },
+                critic: { status: 'queued', activities: [
+                    'Stress-testing assumptions...',
+                    'Identifying regulatory risks...',
+                    'Analyzing competitive threats...',
+                    'Validating technical feasibility...'
+                ], progress: 0 }
+            },
+            businessPlan: {},
+            startTime: null
+        };
+
+        const elements = {
+            generateBtn: document.getElementById('generateBtn'),
+            agentDashboard: document.getElementById('agentDashboard'),
+            outputSection: document.getElementById('outputSection'),
+            businessPlan: document.getElementById('businessPlan'),
+            heroSection: document.getElementById('heroSection'),
+            inputSection: document.getElementById('inputSection'),
+            overallProgress: document.getElementById('overallProgress'),
+            genTime: document.getElementById('genTime'),
+            feedbackBtn: document.getElementById('feedbackBtn'),
+            feedbackPanel: document.getElementById('feedbackPanel'),
+            feedbackInput: document.getElementById('feedbackInput'),
+            submitFeedbackBtn: document.getElementById('submitFeedbackBtn'),
+            cancelFeedbackBtn: document.getElementById('cancelFeedbackBtn'),
+            exportBtn: document.getElementById('exportBtn')
+        };
+
+        function updateAgentStatus(agentName, status, activity = '') {
+            const agent = state.agents[agentName];
+            agent.status = status;
+            
+            const card = document.querySelector(`[data-agent="${agentName}"]`);
+            const statusEl = card.querySelector('.agent-status');
+            const activityEl = card.querySelector('.agent-activity');
+            
+            if (status === 'thinking' || status === 'researching' || status === 'analyzing') {
+                card.classList.add('active');
+                statusEl.className = 'agent-status text-xs px-2 py-1 rounded-full bg-[#7CFC00]/10 text-[#7CFC00] border border-[#7CFC00]/30';
+                statusEl.innerHTML = '<i class="fas fa-circle text-[8px] mr-1 pulse-dot"></i>' + status.charAt(0).toUpperCase() + status.slice(1) + '...';
+                activityEl.textContent = activity;
+            } else if (status === 'complete') {
+                card.classList.remove('active');
+                statusEl.className = 'agent-status text-xs px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+                statusEl.innerHTML = '<i class="fas fa-check text-[8px] mr-1"></i>Complete';
+                activityEl.textContent = '✓ Analysis finished';
+            }
+        }
+
+        function simulateAgentWork() {
+            return new Promise((resolve) => {
+                state.startTime = Date.now();
+                elements.agentDashboard.classList.remove('hidden');
+                elements.agentDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                const agentOrder = ['researcher', 'cfo', 'cmo', 'critic'];
+                const intervals = [];
+                
+                agentOrder.forEach((agentName, index) => {
+                    setTimeout(() => {
+                        let activityIndex = 0;
+                        const agent = state.agents[agentName];
+                        
+                        updateAgentStatus(agentName, 'thinking', agent.activities[0]);
+                        
+                        const interval = setInterval(() => {
+                            activityIndex++;
+                            if (activityIndex < agent.activities.length) {
+                                updateAgentStatus(agentName, 'researching', agent.activities[activityIndex]);
+                            } else {
+                                updateAgentStatus(agentName, 'complete');
+                                clearInterval(interval);
+                                
+                                // Check if all complete
+                                const allComplete = agentOrder.every(a => state.agents[a].status === 'complete');
+                                if (allComplete) {
+                                    elements.overallProgress.textContent = 'All agents finished';
+                                    setTimeout(resolve, 500);
+                                }
+                            }
+                        }, 1200 + Math.random() * 800);
+                        
+                        intervals.push(interval);
+                    }, index * 400);
+                });
+                
+                // Update overall progress
+                let dots = 0;
+                const progressInterval = setInterval(() => {
+                    const completed = Object.values(state.agents).filter(a => a.status === 'complete').length;
+                    dots = (dots + 1) % 4;
+                    elements.overallProgress.textContent = `${completed}/4 agents complete${'.'.repeat(dots)}`;
+                    if (completed === 4) clearInterval(progressInterval);
+                }, 500);
+            });
+        }
+
+        function generateBusinessPlan(feedback = '') {
+            const companyName = document.getElementById('companyName').value || 'Your Company';
+            const businessIdea = document.getElementById('businessIdea').value || 'Innovative solution';
+            const targetMarket = document.getElementById('targetMarket').value || 'Global market';
+            const additional = document.getElementById('additionalDetails').value;
+            
+            // Simulate realistic data based on inputs
+            const hasFeedback = feedback.length > 0;
+            
+            const plan = {
+                'Executive Summary': generateExecutiveSummary(companyName, businessIdea, targetMarket, additional, hasFeedback, feedback),
+                'Market Analysis': generateMarketAnalysis(companyName, targetMarket, hasFeedback, feedback),
+                'Financial Projections': generateFinancials(companyName, hasFeedback, feedback),
+                'Go-To-Market Strategy': generateGTM(companyName, targetMarket, hasFeedback, feedback),
+                'Risks & Mitigations': generateRisks(hasFeedback, feedback)
+            };
+            
+            state.businessPlan = plan;
+            return plan;
+        }
+
+        function generateExecutiveSummary(company, idea, market, additional, hasFeedback, feedback) {
+            const base = `${company} is an innovative ${market.toLowerCase()} solution addressing critical workflow inefficiencies through AI-powered automation. ${idea.substring(0, 200)}...`;
+            
+            const feedbackAdd = hasFeedback ? `\n\nUpdated based on feedback: ${feedback}` : '';
+            
+            return `${base}${feedbackAdd}\n\nKey Highlights:\n• Autonomous multi-agent architecture enables 10x developer productivity\n• Strong product-market fit validated with $${hasFeedback ? '1.2M' : '500K'} pre-seed and 50${hasFeedback ? '+' : ''} pilot customers\n• Path to $${hasFeedback ? '8M' : '5M'} ARR in Year 3 with 85% gross margins\n• Founding team combines expertise from leading automation and AI companies\n\n${company} is positioned to capture significant market share in the rapidly growing $${hasFeedback ? '45B' : '28B'} workflow automation space.`;
+        }
+
+        function generateMarketAnalysis(company, market, hasFeedback, feedback) {
+            const tam = hasFeedback ? '$45.2B' : '$28.6B';
+            const sam = hasFeedback ? '$8.1B' : '$4.2B';
+            const som = hasFeedback ? '$920M' : '$420M';
+            
+            return `Market Size & Opportunity:\n• Total Addressable Market (TAM): ${tam} - Global workflow automation and integration platforms\n• Serviceable Addressable Market (SAM): ${sam} - ${market} segment with automation needs\n• Serviceable Obtainable Market (SOM): ${som} - Realistic 5-year capture assuming 12% penetration\n\nCompetitive Landscape:\n• Incumbents: Zapier, Make.com, n8n - Focus on no-code/low-code with limited AI capabilities\n• Emerging: ${company} differentiates via natural language interface and autonomous agent orchestration\n• Competitive Advantage: 90% faster implementation vs. traditional iPaaS, enterprise-grade security out-of-box\n\nMarket Trends:\n• 67% of ${market.toLowerCase()} companies planning AI automation investments in 2024-2025\n• API economy growth driving need for intelligent integration layers\n• Security and compliance becoming primary vendor selection criteria\n${hasFeedback ? '• Enterprise segment showing 3x growth vs SMB in automation spend\n• International markets represent 40% upside opportunity' : ''}`;
+        }
+
+        function generateFinancials(company, hasFeedback, feedback) {
+            const multiplier = hasFeedback ? 1.6 : 1;
+            const y1 = Math.round(500 * multiplier);
+            const y2 = Math.round(2800 * multiplier);
+            const y3 = Math.round(8200 * multiplier);
+            
+            return {
+                type: 'table',
+                headers: ['Metric', 'Year 1', 'Year 2', 'Year 3'],
+                rows: [
+                    ['Revenue', `$${y1}K`, `$${y2}K`, `$${y3}K`],
+                    ['Customers', `${Math.round(50 * multiplier)}`, `${Math.round(280 * multiplier)}`, `${Math.round(850 * multiplier)}`],
+                    ['ARR', `$${y1}K`, `$${y2}K`, `$${y3}K`],
+                    ['Gross Margin', '82%', '84%', '85%'],
+                    ['Burn Rate', `$${Math.round(180 * multiplier)}K/mo`, `$${Math.round(320 * multiplier)}K/mo`, `$${Math.round(450 * multiplier)}K/mo`],
+                    ['Headcount', '12', '28', '45'],
+                    ['CAC', '$1,200', '$980', '$850'],
+                    ['LTV:CAC', '3.2x', '4.8x', '6.1x']
+                ],
+                notes: `Assumptions: ${hasFeedback ? 'Accelerated enterprise GTM' : 'Product-led growth motion'}, $99-$499/mo pricing tiers, 15% net revenue retention, ${hasFeedback ? '18' : '24'}-month payback period. ${hasFeedback ? '\nFeedback incorporated: Increased marketing investment and enterprise sales motion reflected in projections.' : ''}`
+            };
+        }
+
+        function generateGTM(company, market, hasFeedback, feedback) {
+            const base = `Phase 1 (Months 1-6): Product-Led Growth\n• Launch on Product Hunt, Hacker News with $50K budget\n• Content marketing: 3 technical blogs/week on automation best practices\n• Free tier: 100 tasks/month to drive bottom-up adoption\n• Target: 1,000 signups, 50 paying customers\n\nPhase 2 (Months 7-18): Sales-Assisted Motion\n• Hire 3 AEs focused on ${market.toLowerCase()} mid-market ($50K-$250K ACV)\n• Partner channel: Integrations with Salesforce, HubSpot, Slack\n• Enterprise pilot program: 90-day POCs with Fortune 500\n• Target: $2.5M ARR, NPS >50\n\nPhase 3 (Months 19-36): Scale & Expansion\n• International: EMEA and APAC sales offices\n• Platform strategy: Marketplace for third-party agents\n• Enterprise: Dedicated success team, SOC2 Type II, HIPAA compliance\n• Target: $8M ARR, 15% market share in core segment`;
+            
+            const feedbackNote = hasFeedback ? `\n\nIncorporating Feedback:\n${feedback}\n• Accelerated enterprise motion with dedicated security/compliance engineering\n• Increased marketing spend by 40% for faster brand building\n• Added international expansion in Year 2 vs Year 3` : '';
+            
+            return base + feedbackNote;
+        }
+
+        function generateRisks(hasFeedback, feedback) {
+            const baseRisks = [
+                { risk: 'Competitive: Incumbents add AI features', mitigation: 'Speed of execution + proprietary agent orchestration IP. File patents on core orchestration algorithms.', severity: 'High' },
+                { risk: 'Technical: LLM reliability and hallucination', mitigation: 'Multi-model ensemble with human-in-loop for critical workflows. 99.5% uptime SLA.', severity: 'High' },
+                { risk: 'Market: Slow enterprise adoption cycles', mitigation: 'Start with SMB/mid-market. Build case studies. Offer 90-day pilot programs.', severity: 'Medium' },
+                { risk: 'Security: Data privacy and compliance concerns', mitigation: 'SOC2 Type II, GDPR compliant. On-prem deployment option for enterprises.', severity: 'High' },
+                { risk: 'Talent: Competition for AI engineering talent', mitigation: 'Equity-heavy comp, remote-first, strong engineering brand via open source.', severity: 'Medium' },
+                { risk: 'Economic: Extended sales cycles in downturn', mitigation: 'Focus on ROI messaging: 10x developer productivity. Offer flexible payment terms.', severity: 'Medium' }
+            ];
+            
+            const feedbackRisks = hasFeedback ? [
+                { risk: 'International: Regulatory complexity in EU/APAC', mitigation: 'Partner with local resellers. Dedicated legal counsel per region. Data residency options.', severity: 'Medium' },
+                { risk: 'Scale: Infrastructure costs at enterprise volume', mitigation: 'Multi-cloud strategy with spot instances. Optimize LLM inference costs via caching.', severity: 'Low' }
+            ] : [];
+            
+            return [...baseRisks, ...feedbackRisks];
+        }
+
+        function renderBusinessPlan(plan) {
+            elements.businessPlan.innerHTML = '';
+            
+            Object.entries(plan).forEach(([sectionTitle, content], index) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'glass-effect rounded-xl p-6 slide-in';
+                sectionDiv.style.animationDelay = `${index * 0.1}s`;
+                
+                const header = document.createElement('div');
+                header.className = 'flex items-center justify-between mb-4';
+                header.innerHTML = `
+                    <h3 class="text-xl font-bold flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-[#7CFC00]/10 flex items-center justify-center text-[#7CFC00] text-sm">${index + 1}</span>
+                        ${sectionTitle}
+                    </h3>
+                    <button class="edit-section-btn btn-secondary px-3 py-1 rounded-lg text-xs" data-section="${sectionTitle}">
+                        <i class="fas fa-edit mr-1"></i>Edit
+                    </button>
+                `;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'section-content';
+                contentDiv.setAttribute('data-section', sectionTitle);
+                
+                if (content.type === 'table') {
+                    contentDiv.innerHTML = `
+                        <div class="overflow-x-auto mb-4">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        ${content.headers.map(h => `<th class="text-left py-3 px-4 font-semibold text-zinc-300">${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${content.rows.map(row => `
+                                        <tr class="border-b border-[var(--border-color)]/50 hover:bg-[var(--bg-tertiary)]/50 transition">
+                                            ${row.map(cell => `<td class="py-3 px-4">${cell}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-sm text-zinc-400 italic">${content.notes}</p>
+                    `;
+                } else {
+                    contentDiv.innerHTML = `<div class="text-zinc-300 whitespace-pre-line leading-relaxed">${content}</div>`;
+                }
+                
+                sectionDiv.appendChild(header);
+                sectionDiv.appendChild(contentDiv);
+                elements.businessPlan.appendChild(sectionDiv);
+            });
+            
+            // Attach edit listeners
+            document.querySelectorAll('.edit-section-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const section = e.currentTarget.getAttribute('data-section');
+                    enableSectionEdit(section);
+                });
+            });
+        }
+
+        function enableSectionEdit(sectionTitle) {
+            const contentDiv = document.querySelector(`.section-content[data-section="${sectionTitle}"]`);
+            const currentContent = state.businessPlan[sectionTitle];
+            
+            let textContent = '';
+            if (typeof currentContent === 'object' && currentContent.type === 'table') {
+                textContent = currentContent.notes;
+            } else {
+                textContent = currentContent;
+            }
+            
+            contentDiv.innerHTML = `
+                <textarea class="section-edit input-field w-full px-4 py-3 rounded-lg text-white mb-3" rows="8">${textContent}</textarea>
+                <div class="flex gap-2">
+                    <button class="save-edit-btn btn-primary px-4 py-2 rounded-lg text-sm" data-section="${sectionTitle}">
+                        <i class="fas fa-check mr-1"></i>Save
+                    </button>
+                    <button class="cancel-edit-btn btn-secondary px-4 py-2 rounded-lg text-sm" data-section="${sectionTitle}">Cancel</button>
+                </div>
+            `;
+            
+            contentDiv.querySelector('.save-edit-btn').addEventListener('click', (e) => {
+                const newContent = contentDiv.querySelector('textarea').value;
+                state.businessPlan[sectionTitle] = newContent;
+                renderBusinessPlan(state.businessPlan);
+            });
+            
+            contentDiv.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+                renderBusinessPlan(state.businessPlan);
+            });
+        }
+
+        async function handleGenerate() {
+            if (state.generating) return;
+            
+            const companyName = document.getElementById('companyName').value.trim();
+            const businessIdea = document.getElementById('businessIdea').value.trim();
+            const targetMarket = document.getElementById('targetMarket').value.trim();
+            
+            if (!companyName || !businessIdea || !targetMarket) {
+                alert('Please fill in all required fields: Company Name, Business Idea, and Target Market');
+                return;
+            }
+            
+            state.generating = true;
+            elements.generateBtn.disabled = true;
+            elements.generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            
+            // Reset agents
+            Object.keys(state.agents).forEach(agent => {
+                state.agents[agent].status = 'queued';
+                updateAgentStatus(agent, 'queued');
+            });
+            
+            try {
+                await simulateAgentWork();
+                
+                const plan = generateBusinessPlan();
+                renderBusinessPlan(plan);
+                
+                const endTime = Date.now();
+                const duration = ((endTime - state.startTime) / 1000).toFixed(1);
+                elements.genTime.textContent = duration;
+                
+                elements.outputSection.classList.remove('hidden');
+                elements.outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                console.error('Generation error:', error);
+                alert('Error generating business plan. Please try again.');
+            } finally {
+                state.generating = false;
+                elements.generateBtn.disabled = false;
+                elements.generateBtn.innerHTML = '<i class="fas fa-rocket mr-2"></i>Generate Business Plan';
+            }
+        }
+
+        function handleRegenerateWithFeedback() {
+            const feedback = elements.feedbackInput.value.trim();
+            if (!feedback) {
+                alert('Please provide feedback for the agents');
+                return;
+            }
+            
+            elements.feedbackPanel.classList.add('hidden');
+            
+            // Reset and regenerate
+            simulateAgentWork().then(() => {
+                const plan = generateBusinessPlan(feedback);
+                renderBusinessPlan(plan);
+                elements.feedbackInput.value = '';
+            });
+        }
+
+        function handleExportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const companyName = document.getElementById('companyName').value || 'Business Plan';
+            let yPos = 20;
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setTextColor(124, 252, 0);
+            doc.text(companyName + ' - Business Plan', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(128, 128, 128);
+            doc.text('Generated by Outskill × OpenAI Multi-Agent System', 20, yPos);
+            yPos += 15;
+            
+            // Sections
+            Object.entries(state.businessPlan).forEach(([title, content]) => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                doc.text(title, 20, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(64, 64, 64);
+                
+                if (typeof content === 'object' && content.type === 'table') {
+                    content.rows.forEach(row => {
+                        const text = row.join(' | ');
+                        const lines = doc.splitTextToSize(text, 170);
+                        lines.forEach(line => {
+                            if (yPos > 280) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            doc.text(line, 20, yPos);
+                            yPos += 5;
+                        });
+                    });
+                    yPos += 5;
+                } else {
+                    const lines = doc.splitTextToSize(content, 170);
+                    lines.forEach(line => {
+                        if (yPos > 280) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        doc.text(line, 20, yPos);
+                        yPos += 5;
+                    });
+                }
+                yPos += 10;
+            });
+            
+            doc.save(`${companyName.replace(/\s+/g, '_')}_Business_Plan.pdf`);
+        }
+
+        // Event Listeners
+        elements.generateBtn.addEventListener('click', handleGenerate);
+        elements.feedbackBtn.addEventListener('click', () => {
+            elements.feedbackPanel.classList.toggle('hidden');
+        });
+        elements.cancelFeedbackBtn.addEventListener('click', () => {
+            elements.feedbackPanel.classList.add('hidden');
+            elements.feedbackInput.value = '';
+        });
+        elements.submitFeedbackBtn.addEventListener('click', handleRegenerateWithFeedback);
+        elements.exportBtn.addEventListener('click', handleExportPDF);
+
+        // Demo mode: Auto-fill if URL has ?demo
+        if (window.location.search.includes('demo')) {
+            setTimeout(() => handleGenerate(), 1000);
+        }
+    </script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
