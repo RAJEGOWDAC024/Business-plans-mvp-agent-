@@ -4,7 +4,7 @@
 
 **Built for Outskill × OpenAI AI Builders Hackathon 2026 | Phase 1 Submission**
 
-[[Live Demo](https://rajegowdac024.github.io/Business-plans-mvp-agent/)]
+[[Live Demo](https://rajegowdac024.github.io/Business-plans-mvp-agent-/)]
 
 ### **🎯 Problem**
 First-time founders waste 40+ hours writing business plans. $5k consultants are too expensive. ChatGPT gives generic one-shots with no financials. 67% of pre-seed founders in India delay fundraising due to doc prep.
@@ -32,7 +32,7 @@ Multi-agent AI system where specialized agents work like a real founding team:
 **MVP Link**: https://rajegowdac024.github.io/Business-plans-mvp-agent/  
 
 ### **🚀 How to Use**
-1. Open the [Live Demo](https://rajegowdac024.github.io/Business-plans-mvp-agent/)
+1. Open the [Live Demo](https://rajegowdac024.github.io/Business-plans-mvp-agent-/)
 2. Enter your startup idea: "D2C millet snacks for urban millennials"
 3. Click "Generate Plan" and watch agents work in real-time
 4. Review Market, Financials, GTM, and Critic tabs
@@ -63,7 +63,7 @@ Built by RAJE GOWDA.C for **Outskill × OpenAI AI Builders Hackathon 2026**
 
 ### **📬 Feedback**
 Founders: Would you use this before your next investor call? What's missing? 
-Open an [Issue](https://github.com/RAJEGOWDAC024/Business-plans-mvp-agent/issues) or DM me on [LinkedIn](https://www.linkedin.com/in/raje-gowda-c-a4b56929a).
+Open an [Issue](https://github.com/RAJEGOWDAC024/Business-plans-mvp-agent/) or DM me on [LinkedIn](https://www.linkedin.com/in/raje-gowda-c-a4b56929a).
 
 ---
 
